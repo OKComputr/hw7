@@ -63,6 +63,13 @@ exports.handler = async function(event) {
 
   // set a new Array as part of the return value
   returnValue.sections = []
+  returnValue.sumReviews = []
+  returnValue.averageRating = []
+
+  //define some variables
+
+  let totalReviews = 0
+  let totalAverageRating = 0
 
   // ask Firebase for the sections corresponding to the Document ID of the course, wait for the response
   let sectionsQuery = await db.collection('sections').where(`courseId`, `==`, courseId).get()
@@ -87,14 +94,75 @@ exports.handler = async function(event) {
     // get the data from the returned document
     let lecturer = lecturerQuery.data()
 
-    // add the lecturer's name to the section Object
+    // add to the section Object
     sectionObject.lecturerName = lecturer.name
+    sectionObject.reviews = []
+    sectionObject.numberOfReviews = []
+    sectionObject.averageReview = []
 
     // add the section Object to the return value
     returnValue.sections.push(sectionObject)
 
     // 🔥 your code for the reviews/ratings goes here
+
+
+    // ask Firebase for the sections corresponding to the Document ID of the course, wait for the response
+    let reviewQuery = await db.collection('reviews').where(`sectionID`, `==`, sectionId).get()
+
+    // get the documents from the query
+    let reviews = reviewQuery.docs
+    
+    // define some variables
+    let reviewArray = []
+    let countReviews = 0
+    let sumOfReviews = 0
+    let averageSectionReview = 0
+
+    // loop through reviews
+    for (let j=0; j < reviews.length; j++) {
+
+      
+      // create object for reviews
+      let reviewList = {
+        comment: [],
+        rating: []
+
+      }
+
+      // store values
+      let reviewData = reviews[j].data()
+      let reviewBody = reviewData.body
+      let reviewRating = reviewData.rating
+
+      // push to object
+      reviewList.comment.push(reviewBody)
+      reviewList.rating.push(reviewRating)
+      
+      // count reviews in section
+      
+      countReviews++
+      sumOfReviews = sumOfReviews + Number(reviewData.rating)
+      
+
+    // add the section Object to the return value
+    sectionObject.reviews.push(reviewList)
+
+
+    averageSectionReview = sumOfReviews/countReviews
+
+    }
+
+    totalReviews = countReviews + Number(countReviews)
+    totalAverageRating = (averageSectionReview + Number(averageSectionReview)) / totalReviews
+
+    sectionObject.numberOfReviews.push(countReviews)
+    sectionObject.averageReview.push(averageSectionReview)
+
+
   }
+
+  returnValue.sumReviews.push(totalReviews)
+  returnValue.averageRating.push(totalAverageRating)
 
   // return the standard response
   return {
