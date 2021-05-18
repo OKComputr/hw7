@@ -67,9 +67,9 @@ exports.handler = async function(event) {
   returnValue.averageRating = []
 
   //define some variables
-
-  let totalReviews = 0
   let totalAverageRating = 0
+  let sumOfReviews = 0
+  let totalReviews = 0
 
   // ask Firebase for the sections corresponding to the Document ID of the course, wait for the response
   let sectionsQuery = await db.collection('sections').where(`courseId`, `==`, courseId).get()
@@ -115,8 +115,8 @@ exports.handler = async function(event) {
     // define some variables
     let reviewArray = []
     let countReviews = 0
-    let sumOfReviews = 0
     let averageSectionReview = 0
+    
 
     // loop through reviews
     for (let j=0; j < reviews.length; j++) {
@@ -152,7 +152,8 @@ exports.handler = async function(event) {
 
     }
 
-    totalReviews = countReviews + Number(countReviews)
+    
+    totalReviews = countReviews + Number(totalReviews)
     totalAverageRating = (averageSectionReview + Number(averageSectionReview)) / totalReviews
 
     sectionObject.numberOfReviews.push(countReviews)
